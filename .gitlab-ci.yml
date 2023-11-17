@@ -37,7 +37,7 @@ deploy:
     - echo "Starting to deploy"
     - docker pull $CI_REGISTRY/task.manager/api/api:latest
     - docker run --name $CI_PROJECT_NAME
-        -e ASPNETCORE_ConnectionStrings__Task="$DB_CONN_STRING"
+        -e ASPNETCORE_ConnectionStrings__Contact="$DB_CONN_STRING"
         -p 1232:80 -d $CI_REGISTRY/task.manager/api/api:latest
   environment:
     name: production
