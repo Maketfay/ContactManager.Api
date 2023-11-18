@@ -21,6 +21,7 @@ ConfigureValidators();
 
 var app = builder.Build();
 
+app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().SetPreflightMaxAge(TimeSpan.MaxValue));
 
 app.UseSwagger();
 app.UseSwaggerUI();
@@ -29,8 +30,6 @@ app.UseSwaggerUI();
 app.UseAuthorization();
 
 app.MapControllers();
-
-app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().SetPreflightMaxAge(TimeSpan.MaxValue));
 
 app.Run();
 
