@@ -13,14 +13,6 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c => c.MapType<DateTime>(() => new OpenApiSchema { Type = "string", Format = "date" }));
 
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(builder =>
-        builder.SetIsOriginAllowed(_ => true)
-        .AllowAnyMethod()
-        .AllowAnyHeader()
-        .AllowCredentials());
-});
 
 ConfigureDataProvider();
 ConfigureRepositories();
@@ -38,8 +30,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-//app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().SetPreflightMaxAge(TimeSpan.MaxValue));
-app.UseCors();
+app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().SetPreflightMaxAge(TimeSpan.MaxValue));
 
 app.Run();
 
