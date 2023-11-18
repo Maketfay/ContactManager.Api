@@ -1,0 +1,47 @@
+stages:
+  - build
+  - test
+  - deploy
+
+build:
+  stage: build
+  image: mcr.microsoft.com/dotnet/sdk:7.0
+  script:
+    - 'dotnet restore'
+    - 'dotnet build --no-restore'
+
+test:
+  stage: test
+  image: mcr.microsoft.com/dotnet/sdk:7.0
+  script:
+    - 'dotnet restore'
+    - 'dotnet test --no-restore'
+
+docker_push:
+  stage: deploy
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker build -t $CI_REGISTRY/maketfay/contact-manager/contact-manager:latest -f ./App/Dockerfile .
+    - docker push $CI_REGISTRY/maketfay/contact-manager/contact-manager:latest
+  only:
+    - master
+
+deploy:
+  stage: deploy
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker stop $CI_PROJECT_NAME || true
+    - docker rm $CI_PROJECT_NAME || true
+  script:
+    - echo "Starting to deploy"
+    - docker pull $CI_REGISTRY/maketfay/contact-manager/contact-manager:latest
+    - docker run --name $CI_PROJECT_NAME
+        -e ASPNETCORE_ConnectionStrings__Contact="$DB_CONN_STRING"
+        -p 1232:80 -d $CI_REGISTRY/maketfay/contact-manager/contact-manager:latest
+  environment:
+    name: production
+  needs:
+    - docker_push
+  only:
+    - master
