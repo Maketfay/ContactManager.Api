@@ -38,5 +38,23 @@ namespace Repositories
         {
             return await _context.Contact.ToListAsync();
         }
+
+        public async Task<IContact?> ReadAsync(Guid id)
+        {
+            return await _context.Contact.FirstOrDefaultAsync(c => c.Id.Equals(id));
+        }
+
+        public async Task<IContact> UpdateAsync(IContact contact, string name, string email, string mobilePhone, string jobTitle, DateTime BirthDate)
+        {
+            contact.Name = name;
+            contact.Email = email;
+            contact.MobilePhone = mobilePhone;
+            contact.JobTitle = jobTitle;
+            contact.BirthDate = BirthDate;
+
+            await _context.SaveChangesAsync();
+
+            return contact;
+        }
     }
 }

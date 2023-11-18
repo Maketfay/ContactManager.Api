@@ -35,5 +35,16 @@ namespace Contact.Controllers
             return Ok(contacts);
         }
 
+        [HttpPut("contact")]
+        public async Task<IActionResult> ChangeContact([FromBody] ContactChangeModel model)
+        {
+            var contact = await _contactRepository.ReadAsync(model.Id);
+            if (contact is null)
+                return BadRequest();
+
+            contact = await _contactRepository.UpdateAsync(contact, model.Name, model.Email, model.phoneNumber, model.JobTitle, model.BirthDate);
+
+            return Ok(contact);
+        }
     }
 }
