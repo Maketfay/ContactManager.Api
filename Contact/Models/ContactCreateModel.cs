@@ -10,7 +10,7 @@ namespace Contact.Models
         public string Name { get; set; }
 
         [Required]
-        [JsonProperty("phoneNumber")]
+        [JsonProperty("mobilePhone")]
         public string phoneNumber { get; set; }
 
         [JsonProperty("email")]

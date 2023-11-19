@@ -26,6 +26,7 @@ namespace Repositories
             entity.MobilePhone = mobilePhone;
             entity.JobTitle = jobTitle;
             entity.BirthDate = BirthDate;
+            entity.IsDeleted = false;
 
             var contact = await _context.Contact.AddAsync((ContactEntity)entity);
 
@@ -34,14 +35,14 @@ namespace Repositories
             return contact.Entity;
         }
 
-        public async Task<IEnumerable<IContact>> ReadAllAsync()
+        public async Task<IEnumerable<IContact>> ReadAllAsync(bool isDeleted = false)
         {
-            return await _context.Contact.ToListAsync();
+            return await _context.Contact.Where(c => c.IsDeleted == isDeleted).ToListAsync();
         }
 
-        public async Task<IContact?> ReadAsync(Guid id)
+        public async Task<IContact?> ReadAsync(Guid id, bool isDeleted = false)
         {
-            return await _context.Contact.FirstOrDefaultAsync(c => c.Id.Equals(id));
+            return await _context.Contact.FirstOrDefaultAsync(c => c.Id.Equals(id) && c.IsDeleted == isDeleted);
         }
 
         public async Task<IContact> UpdateAsync(IContact contact, string name, string email, string mobilePhone, string jobTitle, DateTime BirthDate)
@@ -51,6 +52,15 @@ namespace Repositories
             contact.MobilePhone = mobilePhone;
             contact.JobTitle = jobTitle;
             contact.BirthDate = BirthDate;
+
+            await _context.SaveChangesAsync();
+
+            return contact;
+        }
+
+        public async Task<IContact> UpdateAsync(IContact contact, bool isDeleted)
+        {
+            contact.IsDeleted = isDeleted;
 
             await _context.SaveChangesAsync();
 

@@ -24,7 +24,15 @@ namespace Contact.Controllers
 
             var contact = await _contactRepository.CreateAsync(model.Name, model.Email, model.phoneNumber, model.JobTitle, model.BirthDate);
 
-            return Ok(contact);
+            return Ok(new ContactModel
+            {
+                Id = contact.Id,
+                Email = contact.Email,
+                Name = contact.Name,
+                BirthDate = contact.BirthDate,
+                JobTitle = contact.JobTitle,
+                MobilePhone = contact.MobilePhone
+            });
         }
 
         [HttpGet("contact")]
@@ -32,7 +40,16 @@ namespace Contact.Controllers
         {
             var contacts = await _contactRepository.ReadAllAsync();
 
-            return Ok(contacts);
+            var contactsModel = contacts.Select(c => new ContactModel {
+                Id = c.Id,
+                Email = c.Email,
+                Name = c.Name,
+                BirthDate = c.BirthDate,
+                JobTitle = c.JobTitle,
+                MobilePhone = c.MobilePhone
+            });
+
+            return Ok(contactsModel);
         }
 
         [HttpPut("contact")]
@@ -42,9 +59,27 @@ namespace Contact.Controllers
             if (contact is null)
                 return BadRequest();
 
-            contact = await _contactRepository.UpdateAsync(contact, model.Name, model.Email, model.phoneNumber, model.JobTitle, model.BirthDate);
+            contact = await _contactRepository.UpdateAsync(contact, model.Name, model.Email, model.mobilePhone, model.JobTitle, model.BirthDate);
 
-            return Ok(contact);
+            return Ok(new ContactModel { 
+                Id = contact.Id,
+                Email = contact.Email,
+                Name = contact.Name,
+                BirthDate = contact.BirthDate,
+                JobTitle = contact.JobTitle,
+                MobilePhone = contact.MobilePhone
+            });
+        }
+
+        [HttpDelete("contact")]
+        public async Task<IActionResult> DeleteContact([FromBody] ContactDeleteModel model)
+        {
+            var contact = await _contactRepository.ReadAsync(model.Id);
+            if (contact is null)
+                return BadRequest();
+
+            var result = await _contactRepository.UpdateAsync(contact, isDeleted: true);
+            return Ok();
         }
     }
 }
