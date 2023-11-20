@@ -9,7 +9,7 @@ namespace Entity
         public string MobilePhone { get; set; }
         public string Email { get; set; }
         public string JobTitle { get; set; }
-        public DateTime BirthDate { get; set; }
+        public DateTime? BirthDate { get; set; }
         public bool IsDeleted { get; set; }
     }
 }

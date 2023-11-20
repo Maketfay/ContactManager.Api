@@ -4,9 +4,35 @@ namespace Contact.Validators
 {
     public class ContactValidator
     {
-        public bool Validate(ContactCreateModel model)
+        public ContactCreateModel Validate(ContactCreateModel model)
         {
-            return true;
+            if (model is null || string.IsNullOrWhiteSpace(model.Name))
+                return null;
+
+            if (model.Name.Equals(string.Empty))
+                return null;
+
+            if(model.JobTitle is null)
+                model.JobTitle = string.Empty;
+
+            if (model.Email is null)
+                model.Email = string.Empty;
+
+            if (!model.MobilePhone.Contains("+"))
+                model.MobilePhone = model.MobilePhone.Insert(0, "+");
+
+            return model;
+        }
+
+        public ContactChangeModel Validate(ContactChangeModel model)
+        {
+            if (model is null || string.IsNullOrWhiteSpace(model.Name))
+                return null;
+
+            if (!model.MobilePhone.Contains("+"))
+                model.MobilePhone = model.MobilePhone.Insert(0, "+");
+
+            return model;
         }
     }
 }

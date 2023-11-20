@@ -20,6 +20,6 @@ namespace Contact.Models
         public string JobTitle { get; set; }
 
         [JsonProperty("birthDate")]
-        public DateTime BirthDate { get; set; }
+        public DateTime? BirthDate { get; set; }
     }
 }

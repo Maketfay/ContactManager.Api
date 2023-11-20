@@ -7,7 +7,7 @@
         string MobilePhone { get; set; }
         string Email { get; set; }
         string JobTitle { get; set; }
-        DateTime BirthDate { get; set; }
+        DateTime? BirthDate { get; set; }
         bool IsDeleted { get; set; }
     }
 }

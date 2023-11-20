@@ -16,7 +16,7 @@ namespace Repositories
             _context = context;
             _serviceProvider = serviceProvider;
         }
-        public async Task<IContact> CreateAsync(string name, string email, string mobilePhone, string jobTitle, DateTime BirthDate)
+        public async Task<IContact> CreateAsync(string name, string email, string mobilePhone, string jobTitle, DateTime? BirthDate)
         {
             var entity = _serviceProvider.GetRequiredService<IContact>();
 
@@ -35,9 +35,15 @@ namespace Repositories
             return contact.Entity;
         }
 
-        public async Task<IEnumerable<IContact>> ReadAllAsync(bool isDeleted = false)
+        public async Task<IEnumerable<IContact>> ReadCollectionAsync(int page, int pageSize, bool isDeleted = false)
         {
-            return await _context.Contact.Where(c => c.IsDeleted == isDeleted).ToListAsync();
+            var contactQuery = _context.Contact
+                .Where(c => c.IsDeleted == isDeleted)
+                .OrderBy(c => c.Name)
+                .Skip(((page - 1) * pageSize))
+                .Take(pageSize);
+
+            return await contactQuery.ToListAsync();
         }
 
         public async Task<IContact?> ReadAsync(Guid id, bool isDeleted = false)
@@ -45,7 +51,12 @@ namespace Repositories
             return await _context.Contact.FirstOrDefaultAsync(c => c.Id.Equals(id) && c.IsDeleted == isDeleted);
         }
 
-        public async Task<IContact> UpdateAsync(IContact contact, string name, string email, string mobilePhone, string jobTitle, DateTime BirthDate)
+        public async Task<int> ReadCountAsync(bool isDeleted = false)
+        {
+            return await _context.Contact.Where(c => c.IsDeleted == isDeleted).CountAsync();
+        }
+
+        public async Task<IContact> UpdateAsync(IContact contact, string name, string email, string mobilePhone, string jobTitle, DateTime? BirthDate)
         {
             contact.Name = name;
             contact.Email = email;

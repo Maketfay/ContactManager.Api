@@ -5,6 +5,11 @@ using Infrastucture.Entity;
 using Entity;
 using Contact.Validators;
 using Microsoft.OpenApi.Models;
+using Core;
+using Infrastucture.Core;
+using Infrastucture.Services;
+using Services;
+using Contact.ModelBuilders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +23,9 @@ ConfigureDataProvider();
 ConfigureRepositories();
 ConfigureEntities();
 ConfigureValidators();
+ConfigurePagination();
+ConfigureModelBuilders();
+ConfigureServices();
 
 var app = builder.Build();
 
@@ -53,9 +61,23 @@ void ConfigureEntities()
     builder.Services.AddTransient<IContact, ContactEntity>();
 
 }
+void ConfigureServices() 
+{
+    builder.Services.AddScoped<IContactService, ContactService>();
+}
 
 void ConfigureValidators()
 {
     builder.Services.AddScoped<ContactValidator>();
+}
+
+void ConfigureModelBuilders()
+{
+    builder.Services.AddScoped<ContactModelBuilder>();
+}
+
+void ConfigurePagination()
+{
+    builder.Services.AddTransient(typeof(IPagedList<>), typeof(PagedList<>));
 }
 

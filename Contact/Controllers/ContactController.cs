@@ -1,77 +1,71 @@
-﻿using Contact.Models;
+﻿using Contact.ModelBuilders;
+using Contact.Models;
 using Contact.Validators;
+using Core;
 using Infrastucture.Repositories;
+using Infrastucture.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Contact.Controllers
 {
+    [Route("contact")]
     public class ContactController: ControllerBase
     {
         private readonly IContactRepository _contactRepository;
         private readonly ContactValidator _contactValidator;
-        public ContactController(IContactRepository contactRepository, ContactValidator contactValidator)
+        private readonly IContactService _contactService;
+        private readonly ContactModelBuilder _contactModelBuilder;
+
+        public ContactController(IContactRepository contactRepository, ContactValidator contactValidator, IContactService contactService, ContactModelBuilder contactModelBuilder)
         {
             _contactRepository = contactRepository;
             _contactValidator = contactValidator;
+            _contactService = contactService;
+            _contactModelBuilder = contactModelBuilder;
         }
 
-        [HttpPost("contact")]
-        public async Task<IActionResult> CreateContact([FromBody] ContactCreateModel model) 
+        [HttpPost]
+        public async Task<IActionResult> CreateContact([FromBody]ContactCreateModel model) 
         {
-            var isModelValid = _contactValidator.Validate(model);
-            if(!isModelValid)
+            var validModel = _contactValidator.Validate(model);
+            if (validModel is null)
                 return BadRequest();
 
-            var contact = await _contactRepository.CreateAsync(model.Name, model.Email, model.phoneNumber, model.JobTitle, model.BirthDate);
+            var contact = await _contactRepository.CreateAsync(validModel.Name, validModel.Email, validModel.MobilePhone, validModel.JobTitle, validModel.BirthDate);
 
-            return Ok(new ContactModel
-            {
-                Id = contact.Id,
-                Email = contact.Email,
-                Name = contact.Name,
-                BirthDate = contact.BirthDate,
-                JobTitle = contact.JobTitle,
-                MobilePhone = contact.MobilePhone
-            });
+            var contactModel = _contactModelBuilder.Build(contact);
+
+            return Ok(contactModel);
         }
 
-        [HttpGet("contact")]
-        public async Task<IActionResult> GetContacts() 
+        [HttpGet]
+        public async Task<IActionResult> GetContacts([FromQuery] PagedModel model) 
         {
-            var contacts = await _contactRepository.ReadAllAsync();
+            var contacts = await _contactService.GetPagedContactAsync(model.Page, model.PageSize);
 
-            var contactsModel = contacts.Select(c => new ContactModel {
-                Id = c.Id,
-                Email = c.Email,
-                Name = c.Name,
-                BirthDate = c.BirthDate,
-                JobTitle = c.JobTitle,
-                MobilePhone = c.MobilePhone
-            });
+            var contactsModel = _contactModelBuilder.Build(contacts);
 
             return Ok(contactsModel);
         }
 
-        [HttpPut("contact")]
+        [HttpPut]
         public async Task<IActionResult> ChangeContact([FromBody] ContactChangeModel model)
         {
+            var validModel = _contactValidator.Validate(model);
+
             var contact = await _contactRepository.ReadAsync(model.Id);
-            if (contact is null)
+            if ((contact is null) || (validModel is null))
                 return BadRequest();
 
-            contact = await _contactRepository.UpdateAsync(contact, model.Name, model.Email, model.mobilePhone, model.JobTitle, model.BirthDate);
+            contact = await _contactRepository.UpdateAsync(contact, validModel.Name, validModel.Email, validModel.MobilePhone, validModel.JobTitle, validModel.BirthDate);
 
-            return Ok(new ContactModel { 
-                Id = contact.Id,
-                Email = contact.Email,
-                Name = contact.Name,
-                BirthDate = contact.BirthDate,
-                JobTitle = contact.JobTitle,
-                MobilePhone = contact.MobilePhone
-            });
+            var contactModel = _contactModelBuilder.Build(contact);
+            
+ 
+           return Ok(contactModel);
         }
 
-        [HttpDelete("contact")]
+        [HttpDelete]
         public async Task<IActionResult> DeleteContact([FromBody] ContactDeleteModel model)
         {
             var contact = await _contactRepository.ReadAsync(model.Id);

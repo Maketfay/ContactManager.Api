@@ -14,8 +14,9 @@ namespace Contact.Models
         public string Name { get; set; }
 
         [Required]
+        [RegularExpression(@"^\+?\d{10}$")]
         [JsonProperty("mobilePhone")]
-        public string mobilePhone { get; set; }
+        public string MobilePhone { get; set; }
 
         [Required]
         [JsonProperty("email")]
@@ -27,6 +28,6 @@ namespace Contact.Models
 
         [Required]
         [JsonProperty("birthDate")]
-        public DateTime BirthDate { get; set; }
+        public DateTime? BirthDate { get; set; }
     }
 }
